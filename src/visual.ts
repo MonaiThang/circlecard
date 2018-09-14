@@ -56,6 +56,10 @@ module powerbi.extensibility.visual {
         }
 
         public update(options: VisualUpdateOptions) {
+            // Assign dataview to a variable for easy access by:
+            // - declare a variable
+            // - set the variable to reference the dataview object
+            let dataView: DataView = options.dataViews[0];
             // Set width and height of the visual
             let width: number = options.viewport.width;
             let height: number = options.viewport.height;
@@ -77,7 +81,7 @@ module powerbi.extensibility.visual {
                 });
             let fontSizeValue: number = Math.min(width, height) / 5;
             this.textValue
-                .text("Value")
+                .text(dataView.single.value as string)
                 .attr({
                     x: "50%",
                     y: "50%",
@@ -86,7 +90,7 @@ module powerbi.extensibility.visual {
                 }).style("font-size", fontSizeValue + "px");
             let fontSizeLabel: number = fontSizeValue / 4;
             this.textLabel
-                .text("Label")
+                .text(dataView.metadata.columns[0].displayName)
                 .attr({
                     x: "50%",
                     y: height / 2,
