@@ -1,11 +1,11 @@
 {
   "visual": {
     "name": "circleCard",
-    "displayName": "CircleCard",
+    "displayName": "Circle Card",
     "guid": "circleCard0DF861EB190542F78898A2A0CA08E157",
     "visualClassName": "Visual",
     "version": "1.0.0",
-    "description": "",
+    "description": "Displays a formatted measure value inside a circle",
     "supportUrl": "",
     "gitHubUrl": ""
   },
