@@ -37,6 +37,9 @@ module powerbi.extensibility.visual {
         private textValue: d3.Selection<SVGElement>;
         private textLabel: d3.Selection<SVGElement>;
 
+        // Store a reference to the VisualSettings object and describe the visual settings
+        private visualSettings: VisualSettings;
+
         constructor(options: VisualConstructorOptions) {
             // Add an SVG group inside the visual
             this.svg = d3.select(options.element)
@@ -55,11 +58,19 @@ module powerbi.extensibility.visual {
                 .classed("textLabel", true);
         }
 
+        // Populate formatting options
+        public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstanceEnumeration {
+            const settings: VisualSettings = this.visualSettings ||
+                VisualSettings.getDefault() as VisualSettings;
+            return VisualSettings.enumerateObjectInstances(settings, options);
+        }
+
         public update(options: VisualUpdateOptions) {
             // Assign dataview to a variable for easy access by:
             // - declare a variable
             // - set the variable to reference the dataview object
             let dataView: DataView = options.dataViews[0];
+
             // Set width and height of the visual
             let width: number = options.viewport.width;
             let height: number = options.viewport.height;
@@ -67,13 +78,22 @@ module powerbi.extensibility.visual {
                 width: width,
                 height: height
             });
+
             // Initialise the attributes and styles of the visual elements
             let radius: number = Math.min(width, height) / 2.2;
+
+            // Retrieve the format options and adjust any value passed into the circleThinkness property
+            this.visualSettings = VisualSettings.parse<VisualSettings>(dataView);
+            // Convert to 0 if negative, or 10 if greater than 10
+            this.visualSettings.circle.circleThickness = Math.max(0, this.visualSettings.circle.circleThickness);
+            this.visualSettings.circle.circleThickness = Math.min(10, this.visualSettings.circle.circleThickness);
+
+            // Configure circle styles using circle settings parameters
             this.circle
-                .style("fill", "white")
+                .style("fill", this.visualSettings.circle.circleColor)
                 .style("fill-opacity", 0.5)
                 .style("stroke", "black")
-                .style("stroke-width", 2)
+                .style("stroke-width", this.visualSettings.circle.circleThickness)
                 .attr({
                     r: radius,
                     cx: width / 2,

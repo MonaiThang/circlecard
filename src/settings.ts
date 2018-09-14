@@ -25,24 +25,21 @@
  */
 
 module powerbi.extensibility.visual {
-    "use strict";
-    import DataViewObjectsParser = powerbi.extensibility.utils.dataview.DataViewObjectsParser;
+  "use strict";
+  import DataViewObjectsParser = powerbi.extensibility.utils.dataview.DataViewObjectsParser;
 
-    export class VisualSettings extends DataViewObjectsParser {
-      public dataPoint: dataPointSettings = new dataPointSettings();
-      }
+  // Define 2 properties with names that match the objects defined in the capabilities.json
+  export class CircleSettings {
+    // Set default values
+    public circleColor: string = "white";
+    public circleThickness: number = 2;
+  }
 
-    export class dataPointSettings {
-     // Default color
-      public defaultColor: string = "";
-     // Show all
-      public showAllDataPoints: boolean = true;
-     // Fill
-      public fill: string = "";
-     // Color saturation
-      public fillRule: string = "";
-     // Text Size
-      public fontSize: number = 12;
-     }
+  // Inherit the DataViewObjectsParser
+  export class VisualSettings extends DataViewObjectsParser {
+    // Add circle property that matches the objects defined in the capabilities.json
+    // Return an instance of CircleSettings
+    public circle: CircleSettings = new CircleSettings();
+  }
 
 }
