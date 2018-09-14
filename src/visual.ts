@@ -27,45 +27,73 @@
 module powerbi.extensibility.visual {
     "use strict";
     export class Visual implements IVisual {
-        private target: HTMLElement;
-        private updateCount: number;
-        private settings: VisualSettings;
-        private textNode: Text;
+        // Declare properties that will reference:
+        // - the visual control (host)
+        // - each of the D3 (SVG) elements
+        private host: IVisualHost;
+        private svg: d3.Selection<SVGElement>;
+        private container: d3.Selection<SVGElement>;
+        private circle: d3.Selection<SVGElement>;
+        private textValue: d3.Selection<SVGElement>;
+        private textLabel: d3.Selection<SVGElement>;
 
         constructor(options: VisualConstructorOptions) {
-            console.log('Visual constructor', options);
-            this.target = options.element;
-            this.updateCount = 0;
-            if (typeof document !== "undefined") {
-                const new_p: HTMLElement = document.createElement("p");
-                new_p.appendChild(document.createTextNode("Update count:"));
-                const new_em: HTMLElement = document.createElement("em");
-                this.textNode = document.createTextNode(this.updateCount.toString());
-                new_em.appendChild(this.textNode);
-                new_p.appendChild(new_em);
-                this.target.appendChild(new_p);
-            }
+            // Add an SVG group inside the visual
+            this.svg = d3.select(options.element)
+                .append('svg')
+                .classed('circleCard', true);
+            this.container = this.svg.append("g")
+                .classed('container', true);
+            // Add elements into the SVG group:
+            // - 1 circle
+            // - 2 text elements
+            this.circle = this.container.append("circle")
+                .classed('circle', true);
+            this.textValue = this.container.append("text")
+                .classed("textValue", true);
+            this.textLabel = this.container.append("text")
+                .classed("textLabel", true);
         }
 
         public update(options: VisualUpdateOptions) {
-            this.settings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
-            console.log('Visual update', options);
-            if (typeof this.textNode !== "undefined") {
-                this.textNode.textContent = (this.updateCount++).toString();
-            }
-        }
-
-        private static parseSettings(dataView: DataView): VisualSettings {
-            return VisualSettings.parse(dataView) as VisualSettings;
-        }
-
-        /** 
-         * This function gets called for each of the objects defined in the capabilities files and allows you to select which of the 
-         * objects and properties you want to expose to the users in the property pane.
-         * 
-         */
-        public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] | VisualObjectInstanceEnumerationObject {
-            return VisualSettings.enumerateObjectInstances(this.settings || VisualSettings.getDefault(), options);
+            // Set width and height of the visual
+            let width: number = options.viewport.width;
+            let height: number = options.viewport.height;
+            this.svg.attr({
+                width: width,
+                height: height
+            });
+            // Initialise the attributes and styles of the visual elements
+            let radius: number = Math.min(width, height) / 2.2;
+            this.circle
+                .style("fill", "white")
+                .style("fill-opacity", 0.5)
+                .style("stroke", "black")
+                .style("stroke-width", 2)
+                .attr({
+                    r: radius,
+                    cx: width / 2,
+                    cy: height / 2
+                });
+            let fontSizeValue: number = Math.min(width, height) / 5;
+            this.textValue
+                .text("Value")
+                .attr({
+                    x: "50%",
+                    y: "50%",
+                    dy: "0.35em",
+                    "text-anchor": "middle"
+                }).style("font-size", fontSizeValue + "px");
+            let fontSizeLabel: number = fontSizeValue / 4;
+            this.textLabel
+                .text("Label")
+                .attr({
+                    x: "50%",
+                    y: height / 2,
+                    dy: fontSizeValue / 1.2,
+                    "text-anchor": "middle"
+                })
+                .style("font-size", fontSizeLabel + "px");
         }
     }
 }
